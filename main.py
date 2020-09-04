@@ -78,9 +78,9 @@ class robot:
 def main():
     myrobot = robot()
     myrobot.set(30.0, 50.0, pi / 2)
-    myrobot = myrobot.move(pi / 2, 15)
+    myrobot = myrobot.move(-pi / 2, 15)
     print(myrobot.sense())
-    myrobot = myrobot.move(pi / 2, 10)
+    myrobot = myrobot.move(-pi / 2, 10)
     print(myrobot.sense())
 
 
