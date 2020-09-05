@@ -72,16 +72,67 @@ class robot:
         return prob
 
     def __str__(self):
-        return "[x={0} y={1} heading={2}]".format(self.x, self.y, self.orientation)
+        return "[x=%.6s y=%.6s heading=%.6s]" % (self.x, self.y, self.orientation)
+
+def eval(r, p):
+    sum = 0.0;
+    for i in range(len(p)):    # calculate mean error
+        dx = (p[i].x - r.x + (world_size/2.0)) % world_size - (world_size/2.0)
+        dy = (p[i].y - r.y + (world_size/2.0)) % world_size - (world_size/2.0)
+        err = sqrt(dx * dx + dy * dy)
+        sum += err
+    return sum / float(len(p))
 
 
 def main():
     myrobot = robot()
-    myrobot.set(30.0, 50.0, pi / 2)
-    myrobot = myrobot.move(-pi / 2, 15)
-    print(myrobot.sense())
-    myrobot = myrobot.move(-pi / 2, 10)
-    print(myrobot.sense())
+    myrobot = myrobot.move(0.1, 5)
+    Z = myrobot.sense()
+    # print(Z)
+    # print(myrobot)
+    N = 1000
+    p = []
+    e= []
+    T = 10
+
+    # set particles
+    for i in range(N):
+        x = robot()
+        x.set_noise(0.05, 0.05, 5.0)
+        p.append(x)
+
+    # move particles
+    p2 = []
+    for j in range(T):
+        for i in range(N):
+            p2.append(p[i].move(0.1, 5.0))
+        p = p2
+
+    # Particle Weight
+        w = []
+        for i in range(N):
+            w.append(p[i].measurement_prob(Z))
+
+    # resampling wheel
+        p3 = []
+        index = int(random.random() * N)
+        beta = 0.0
+        mw = max(w)
+        for i in range(N):
+            beta += random.random() * 2.0 * mw
+            while beta > w[index]:
+                beta -= w[index]
+                index = (index + 1) % N
+            p3.append(p[index])
+        p = p3
+        e.append(eval(myrobot, p))
+    for i in e:
+        print(i)
+
+    # print('\n')
+    # for i in p:
+    #     print(i)
+    # print("the real one\n", myrobot)
 
 
 if __name__ == '__main__':
